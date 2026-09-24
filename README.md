@@ -26,11 +26,11 @@ The running server must restart after Python changes. Browser assets load on ref
 - Three sample customer inquiries, editable structured job briefs, and duplicate-safe job creation.
 - Decimal quote calculations, immutable revisions, internal approval, and stale-version protection.
 - Whole-day crew and equipment assignments with inclusive date conflict checking.
-- Job progression, operational notes, editable customer drafts, and clipboard copying.
+- Job progression, operational notes, expandable activity history, editable customer drafts, and clipboard copying.
 - Illustrative QuickBooks, email/calendar and CRM payload previews stored locally.
 - Per-visitor workspaces, responsive pages, and a reset action limited to the current workspace.
 
-A fresh quote revision needs approval again. Quotes and assignments become read-only after work starts; quotes also lock once a job is scheduled. An internal approval is not customer acceptance. Totals are illustrative CAD, before tax. Each quote line is rounded to cents using ROUND_HALF_UP, then the rounded lines are summed.
+When another job form has unsaved edits, saving asks whether to keep editing or explicitly discard those other edits. Save changes before navigating away or reloading. A fresh quote revision needs approval again. Quotes and assignments become read-only after work starts; quotes also lock once a job is scheduled. An internal approval is not customer acceptance. Totals are illustrative CAD, before tax. Each quote line is rounded to cents using ROUND_HALF_UP, then the rounded lines are summed.
 
 ## Configuration and persistence
 
@@ -48,7 +48,7 @@ rtk "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -Command '$env:A
 
 SQLite schema version 1 is initialized only for a fresh database. An unknown schema/version fails startup rather than replacing data. Back up data/frank.db with the server stopped. Reset sample data uses the application dialog; it never resets another visitor's workspace.
 
-A random HTTP-only cookie identifies each workspace; only its hash is stored in the database. Cookies expire after seven days. Losing the cookie starts a new workspace; this demo has no account recovery. Database rows are retained until a future retention policy is implemented. Do not enter real customer data.
+A random HTTP-only cookie identifies each workspace; only its hash is stored in the database. The browser cookie expires after seven days; the server does not independently revoke a copied token after seven days. Losing the cookie starts a new workspace; this demo has no account recovery. Database rows are retained until a future retention policy is implemented. Do not enter real customer data.
 
 The initial SQLite implementation uses one Uvicorn worker, explicit write transactions, and a bounded busy timeout. It accepts DATABASE_URL as configuration but deliberately rejects non-SQLite databases: PostgreSQL schema/locking behavior has not been implemented or verified.
 
@@ -59,7 +59,7 @@ rtk "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -Command 'New-It
 rtk "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -Command '.venv/Scripts/python.exe -m compileall -q app'
 ```
 
-Use a new basetemp subdirectory for each run if Windows retains handles to previous test files.
+Use a new basetemp subdirectory for each run if Windows retains handles to previous test files. Frontend regressions use Node 22.17.1 and its built-in test runner (no npm dependencies): run node --test tests/ui.test.mjs through the same RTK/PowerShell wrapper.
 
 Read [DEMO.md](DEMO.md) for the client walkthrough and [VALIDATION.md](VALIDATION.md) for evidence and limits.
 

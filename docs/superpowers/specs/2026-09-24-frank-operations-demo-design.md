@@ -1,6 +1,6 @@
 # Frank Operations Desk — MVP design
 
-Status: Approved by the user ("按这份方案继续"); implementation planning in progress.
+Status: Approved by the user ("按这份方案继续"); implementation, local verification, independent final review and its two fixes complete.
 
 ## Purpose and source
 

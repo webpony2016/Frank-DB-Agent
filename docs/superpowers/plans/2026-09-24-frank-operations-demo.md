@@ -88,9 +88,9 @@ Dates use ISO `YYYY-MM-DD`; UI labels use Toronto business dates without browser
 
 **Interfaces:** Produces `create_app`, `read_session`, `write_session`, `DomainError`, `seed_workspace(session, workspace_id, today: date) -> None`, `business_date() -> date`, and the `/health` and `/api/bootstrap` contracts. Test fixtures produce `app`, `client`, and `other_client`.
 
-- [ ] Check exact Python/runtime and dependency availability through RTK. Create project-local Git metadata with `git init -b codex/frank-operations-demo` only after confirming `.git` is absent here. Never use the parent repository for staging. Add `.venv/`, `data/`, `.env`, `.pytest_cache/`, `__pycache__/`, `.tmp_pytest/`, and local logs to `.gitignore`.
-- [ ] Create an isolated virtual environment and install the listed dependencies from the normal package registry. Configure pytest to import `app` from the repository root. Tests and seed data must not depend on network access or a model credential.
-- [ ] Write the first workspace tests with these fixtures and assertions:
+- [x] Check exact Python/runtime and dependency availability through RTK. Create project-local Git metadata with `git init -b codex/frank-operations-demo` only after confirming `.git` is absent here. Never use the parent repository for staging. Add `.venv/`, `data/`, `.env`, `.pytest_cache/`, `__pycache__/`, `.tmp_pytest/`, and local logs to `.gitignore`.
+- [x] Create an isolated virtual environment and install the listed dependencies from the normal package registry. Configure pytest to import `app` from the repository root. Tests and seed data must not depend on network access or a model credential.
+- [x] Write the first workspace tests with these fixtures and assertions:
 
 ```python
 # tests/conftest.py
@@ -126,8 +126,8 @@ def test_workspace_seeds_once_and_is_isolated(client, other_client):
     assert client.get("/api/bootstrap").headers["cache-control"] == "no-store"
 ```
 
-- [ ] Run `.venv\Scripts\python.exe -m pytest tests/test_workspaces.py -q -p no:cacheprovider --basetemp=.tmp_pytest/task1-red`; expect collection failure until `create_app` exists. Implement app, tables, cookie setup, seed, and bootstrap. Generate a cryptographically random workspace token with `secrets.token_urlsafe(32)` and store only its SHA-256 hash. Unknown tokens create fresh workspaces, never attach to a caller-supplied workspace ID. Cookie is HttpOnly and SameSite=Lax; secure mode is configurable for later HTTPS hosting.
-- [ ] Create 3 fictional inquiries, 6 jobs across workflow states, 3 crews, and 3 equipment units. Resource reservations must be internally consistent. Build metrics from queries instead of hardcoded KPI values. Date helper implementation:
+- [x] Run `.venv\Scripts\python.exe -m pytest tests/test_workspaces.py -q -p no:cacheprovider --basetemp=.tmp_pytest/task1-red`; expect collection failure until `create_app` exists. Implement app, tables, cookie setup, seed, and bootstrap. Generate a cryptographically random workspace token with `secrets.token_urlsafe(32)` and store only its SHA-256 hash. Unknown tokens create fresh workspaces, never attach to a caller-supplied workspace ID. Cookie is HttpOnly and SameSite=Lax; secure mode is configurable for later HTTPS hosting.
+- [x] Create 3 fictional inquiries, 6 jobs across workflow states, 3 crews, and 3 equipment units. Resource reservations must be internally consistent. Build metrics from queries instead of hardcoded KPI values. Date helper implementation:
 
 ```python
 from datetime import datetime
@@ -137,8 +137,8 @@ def business_date():
     return datetime.now(ZoneInfo("America/Toronto")).date()
 ```
 
-- [ ] Add a time-boundary unit check that converts `2026-09-24T02:30:00+00:00` to Toronto date `2026-09-23`, verify generated assignments use the injected seed date, and verify a malformed cookie receives a new dataset. Verify cookie flags and unsupported schema rejection. Rerun Task 1 tests until green.
-- [ ] Stage only the Task 1 files in the project-local repository and commit with `feat: add isolated persisted sample workspaces`.
+- [x] Add a time-boundary unit check that converts `2026-09-24T02:30:00+00:00` to Toronto date `2026-09-23`, verify generated assignments use the injected seed date, and verify a malformed cookie receives a new dataset. Verify cookie flags and unsupported schema rejection. Rerun Task 1 tests until green.
+- [x] Stage only the Task 1 files in the project-local repository and commit with `feat: add isolated persisted sample workspaces`.
 
 ### Task 2: Inquiry-to-job workflow with editable briefs
 
@@ -146,7 +146,7 @@ def business_date():
 
 **Interfaces:** Consumes workspace/session infrastructure. Produces `require_job`, `get_job_detail(session, workspace_id, job_id) -> dict`, `prepare_brief(session, workspace_id, inquiry_id) -> dict`, `convert_inquiry(session, workspace_id, inquiry_id, brief: JobBriefInput) -> tuple[Job, bool]`. `JobBriefInput` defines the brief fields in the API table; `missing_information` is output-only. The assistant returns provenance and never updates jobs by itself.
 
-- [ ] Add the reusable `new_job(client) -> dict` test helper in `tests/conftest.py`:
+- [x] Add the reusable `new_job(client) -> dict` test helper in `tests/conftest.py`:
 
 ```python
 def new_job(client):
@@ -158,7 +158,7 @@ def new_job(client):
     return response.json()
 ```
 
-- [ ] Write tests for idempotent conversion, edited site persistence, and foreign IDs:
+- [x] Write tests for idempotent conversion, edited site persistence, and foreign IDs:
 
 ```python
 from conftest import new_job
@@ -182,9 +182,9 @@ def test_conversion_is_idempotent(client):
     assert second.json()["site"] == brief["site"]
 ```
 
-- [ ] Run `.venv\Scripts\python.exe -m pytest tests/test_jobs.py -q -p no:cacheprovider --basetemp=.tmp_pytest/task2-red`; observe failure at the missing endpoint. Implement scope-checked lookup, unique source-inquiry constraint, validated input, and creation event in one transaction. Returning an existing conversion must not overwrite reviewed details.
-- [ ] Use a sample-key lookup for known seeded inquiries; a missing sample key returns empty editable fields and an explicit manual-entry message with provenance `manual-entry-required`. Do not infer arbitrary text with an undisclosed keyword simulator. Add tests for an unknown key, foreign customer/inquiry IDs, and a reversed requested date range.
-- [ ] Run workspace/intake tests; commit Task 2 files with `feat: turn sample inquiries into reviewed jobs`.
+- [x] Run `.venv\Scripts\python.exe -m pytest tests/test_jobs.py -q -p no:cacheprovider --basetemp=.tmp_pytest/task2-red`; observe failure at the missing endpoint. Implement scope-checked lookup, unique source-inquiry constraint, validated input, and creation event in one transaction. Returning an existing conversion must not overwrite reviewed details.
+- [x] Use a sample-key lookup for known seeded inquiries; a missing sample key returns empty editable fields and an explicit manual-entry message with provenance `manual-entry-required`. Do not infer arbitrary text with an undisclosed keyword simulator. Add tests for an unknown key, foreign customer/inquiry IDs, and a reversed requested date range.
+- [x] Run workspace/intake tests; commit Task 2 files with `feat: turn sample inquiries into reviewed jobs`.
 
 ### Task 3: Exact quotes, immutable revisions, and approval
 
@@ -192,7 +192,7 @@ def test_conversion_is_idempotent(client):
 
 **Interfaces:** `quote_total_cents(lines: list[QuoteLineInput]) -> int`; `save_quote(session, workspace_id, job_id, expected_version: int, lines: list[QuoteLineInput]) -> Job`; `approve_quote(session, workspace_id, job_id, quote_id, expected_version: int) -> Job`. Quote outputs include `id`, `revision`, `state`, `lines`, `total` (two-decimal string), and `total_cents`.
 
-- [ ] Add `save_quote(client, job, price="125.55") -> dict` to `tests/conftest.py`, posting `expected_version=job["version"]` and one line `{"description":"Illustrative mobilization","quantity":"2","unit_price":price}` to the quote endpoint and asserting HTTP 200. Write this test before implementation:
+- [x] Add `save_quote(client, job, price="125.55") -> dict` to `tests/conftest.py`, posting `expected_version=job["version"]` and one line `{"description":"Illustrative mobilization","quantity":"2","unit_price":price}` to the quote endpoint and asserting HTTP 200. Write this test before implementation:
 
 ```python
 from conftest import new_job, save_quote
@@ -211,7 +211,7 @@ def test_old_quote_cannot_be_approved(client):
     assert approved.json()["status"] == "quoted"
 ```
 
-- [ ] Run quote tests expecting missing-endpoint failures. Implement line validation, cents arithmetic, current-revision check, and optimistic job versions inside write transactions. The money primitive is:
+- [x] Run quote tests expecting missing-endpoint failures. Implement line validation, cents arithmetic, current-revision check, and optimistic job versions inside write transactions. The money primitive is:
 
 ```python
 from decimal import Decimal, ROUND_HALF_UP
@@ -221,9 +221,9 @@ def line_cents(quantity: Decimal, unit_price: Decimal) -> int:
     return int(amount * 100)
 ```
 
-- [ ] Add parameterized invalid values (`"NaN"`, `"Infinity"`, `"-1"`, excessive precision, above-bound quantities/prices), empty lines, long descriptions, and total overflow. Verify `0.333 × 10.00 = 3.33`, and two `0.005 × 1.00` lines total `0.02` under per-line rounding. Every rejected request must leave the quote history and job version unchanged.
-- [ ] Approve a quote, save a revision, and assert the old revision remains approved and unchanged while the job returns to `draft` awaiting the new approval. Assert stale `expected_version` returns 409, scheduled/completed quote edits return 409, and quote IDs from another job/workspace return 404.
-- [ ] Run Tasks 1–3 tests; commit with `feat: add exact quote revisions and internal approval`.
+- [x] Add parameterized invalid values (`"NaN"`, `"Infinity"`, `"-1"`, excessive precision, above-bound quantities/prices), empty lines, long descriptions, and total overflow. Verify `0.333 × 10.00 = 3.33`, and two `0.005 × 1.00` lines total `0.02` under per-line rounding. Every rejected request must leave the quote history and job version unchanged.
+- [x] Approve a quote, save a revision, and assert the old revision remains approved and unchanged while the job returns to `draft` awaiting the new approval. Assert stale `expected_version` returns 409, scheduled/completed quote edits return 409, and quote IDs from another job/workspace return 404.
+- [x] Run Tasks 1–3 tests; commit with `feat: add exact quote revisions and internal approval`.
 
 ### Task 4: Resource scheduling and job progression
 
@@ -231,7 +231,7 @@ def line_cents(quantity: Decimal, unit_price: Decimal) -> int:
 
 **Interfaces:** `assign_job(session, workspace_id, job_id, assignment: AssignmentInput) -> Job`; `transition_job(session, workspace_id, job_id, expected_version: int, status: str) -> Job`. `AssignmentInput` contains the five assignment fields and version from the API table. A reservation overlaps when `existing.start_date <= proposed.end_date and existing.end_date >= proposed.start_date`. Either resource matching creates a conflict. Exclude the current job during a reschedule.
 
-- [ ] Add `approved_job(client) -> dict` to `tests/conftest.py`: call `new_job`, call `save_quote`, POST approval for the last quote with the returned job version, assert 200, and return the detail. Add these behavioral tests:
+- [x] Add `approved_job(client) -> dict` to `tests/conftest.py`: call `new_job`, call `save_quote`, POST approval for the last quote with the returned job version, assert 200, and return the detail. Add these behavioral tests:
 
 ```python
 from datetime import date, timedelta
@@ -259,11 +259,11 @@ def test_draft_cannot_jump_to_completed(client):
     assert response.status_code == 409
 ```
 
-- [ ] Run scheduling tests expecting failure. Implement resource membership checks, approved-current-quote requirement, date validation, conflict query, transactional assignment/event, and version increment. Limit proposed assignment span to 366 days, report the resource and conflicting date range, and keep operational dates as SQL Date fields.
-- [ ] Allow scheduling for `quoted` and rescheduling for `scheduled`; allow only `scheduled → in_progress → completed` through the status endpoint. Completed/in-progress assignment edits return 409. Notes and customer drafts remain available after completion.
-- [ ] Parameterize conflicts so same crew/different equipment and different crew/same equipment both fail. Test shared end/start boundary conflicts, disjoint next-day success, reversed date rejection, foreign resource IDs, self-reschedule success, stale version rejection, and completed-job immutability.
-- [ ] Add a service-level concurrent reservation test: create two separate database sessions against the same test SQLite file; use two thread workers and a start barrier to submit different jobs for the same resources/date. Start the barrier before acquiring each write transaction. Assert exactly one success, one 409, and one persisted assignment. Verify the failed transaction adds no event. This test checks the database locking behavior, not merely the query predicate.
-- [ ] Run tests for Tasks 1–4; commit with `feat: schedule jobs with resource conflict protection`.
+- [x] Run scheduling tests expecting failure. Implement resource membership checks, approved-current-quote requirement, date validation, conflict query, transactional assignment/event, and version increment. Limit proposed assignment span to 366 days, report the resource and conflicting date range, and keep operational dates as SQL Date fields.
+- [x] Allow scheduling for `quoted` and rescheduling for `scheduled`; allow only `scheduled → in_progress → completed` through the status endpoint. Completed/in-progress assignment edits return 409. Notes and customer drafts remain available after completion.
+- [x] Parameterize conflicts so same crew/different equipment and different crew/same equipment both fail. Test shared end/start boundary conflicts, disjoint next-day success, reversed date rejection, foreign resource IDs, self-reschedule success, stale version rejection, and completed-job immutability.
+- [x] Add a service-level concurrent reservation test: create two separate database sessions against the same test SQLite file; use two thread workers and a start barrier to submit different jobs for the same resources/date. Start the barrier before acquiring each write transaction. Assert exactly one success, one 409, and one persisted assignment. Verify the failed transaction adds no event. This test checks the database locking behavior, not merely the query predicate.
+- [x] Run tests for Tasks 1–4; commit with `feat: schedule jobs with resource conflict protection`.
 
 ### Task 5: Operational notes, customer drafts, and honest integration previews
 
@@ -271,7 +271,7 @@ def test_draft_cannot_jump_to_completed(client):
 
 **Interfaces:** `add_note(session, workspace_id, job_id, expected_version: int, text: str) -> Job`; `create_draft(session, workspace_id, job_id, expected_version: int) -> Job`; `update_draft(session, workspace_id, job_id, draft_id, payload: DraftInput) -> Job`; `preview_integration(session, workspace_id, job_id, expected_version: int, connector: str) -> dict`. `DraftInput` contains `expected_version`, `subject`, and `body`. Preview output has `mode="sample"`, `connected=false`, `sent=false`, `connector`, `mapping`, `payload`, and `created_at`.
 
-- [ ] Write tests before adding endpoints:
+- [x] Write tests before adding endpoints:
 
 ```python
 from conftest import new_job
@@ -300,10 +300,10 @@ def test_preview_is_explicitly_local(client):
     assert preview["payload"]["job_id"] == job["id"]
 ```
 
-- [ ] Run communications tests expecting missing endpoints. Implement templates using saved customer/job/status and actual assignment dates. Unscheduled drafts explicitly say scheduling is pending; no invented date or acceptance claims. Prefix subject/body with appropriate sample context in the surrounding UI, keeping editable draft text practical.
-- [ ] Provide illustrative payloads: QuickBooks estimate uses current quote lines/amounts and requires a current quote; calendar uses actual assignment dates/resources and requires an assignment; CRM uses current customer/job/status. Use generic preview field names rather than claiming a vendor-validated schema. Missing prerequisites return 409 with instructions. No connector has an OAuth button that pretends to authenticate.
-- [ ] Save local preview/draft/note event and job version atomically. Add tests for unscheduled-message wording, edited draft persistence, foreign draft IDs, invalid connectors, missing preview prerequisites, note length, and HTML text preservation. Patch `socket.create_connection` to raise in the preview test and verify that all connector preview paths still work without network access.
-- [ ] Run Tasks 1–5 tests; commit with `feat: add editable sample communications and integration previews`.
+- [x] Run communications tests expecting missing endpoints. Implement templates using saved customer/job/status and actual assignment dates. Unscheduled drafts explicitly say scheduling is pending; no invented date or acceptance claims. Prefix subject/body with appropriate sample context in the surrounding UI, keeping editable draft text practical.
+- [x] Provide illustrative payloads: QuickBooks estimate uses current quote lines/amounts and requires a current quote; calendar uses actual assignment dates/resources and requires an assignment; CRM uses current customer/job/status. Use generic preview field names rather than claiming a vendor-validated schema. Missing prerequisites return 409 with instructions. No connector has an OAuth button that pretends to authenticate.
+- [x] Save local preview/draft/note event and job version atomically. Add tests for unscheduled-message wording, edited draft persistence, foreign draft IDs, invalid connectors, missing preview prerequisites, note length, and HTML text preservation. Patch `socket.create_connection` to raise in the preview test and verify that all connector preview paths still work without network access.
+- [x] Run Tasks 1–5 tests; commit with `feat: add editable sample communications and integration previews`.
 
 ### Task 6: Responsive English interface and the complete client journey
 
@@ -311,9 +311,9 @@ def test_preview_is_explicitly_local(client):
 
 **Interfaces:** `api(path: string, options?: object) -> Promise<object>` wraps JSON requests; `refresh() -> Promise<void>` reloads bootstrap and rerenders; `renderView(root: Element, state: object, actions: object) -> void` draws Overview/Inbox/Jobs/Schedule/Integrations; `renderJob(root: Element, job: object, actions: object) -> void` draws a job workspace. URL hashes select the view and job (`#overview`, `#inbox`, `#jobs`, `#jobs/<uuid>`, `#schedule`, `#integrations`). No custom client-side framework or bundler is needed.
 
-- [ ] Start the app locally with `.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000`. Use a hidden process or managed terminal, capture logs in the project, and verify `/health` before browser inspection. Read applicable browser/local-development guidance before browser verification.
-- [ ] Build the semantic shell: skip link, side navigation with active state, main heading, sample-mode badge, workspace reset action, and live status/error region. No external fonts or third-party scripts. Use system fonts, warm surface colors, dark navigation, amber actions, visible keyboard focus, and accessible labels.
-- [ ] Implement the request primitive and safe text rendering before views:
+- [x] Start the app locally with `.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000`. Use a hidden process or managed terminal, capture logs in the project, and verify `/health` before browser inspection. Read applicable browser/local-development guidance before browser verification.
+- [x] Build the semantic shell: skip link, side navigation with active state, main heading, sample-mode badge, workspace reset action, and live status/error region. No external fonts or third-party scripts. Use system fonts, warm surface colors, dark navigation, amber actions, visible keyboard focus, and accessible labels.
+- [x] Implement the request primitive and safe text rendering before views:
 
 ```javascript
 export async function api(path, options = {}) {
@@ -340,13 +340,13 @@ export function text(tag, value, className = "") {
 }
 ```
 
-- [ ] Overview displays derived metrics, upcoming assignments, unconverted inquiry cards, draft quotes needing review, and activity. Inbox shows the original sample email, a **Prepare job brief** action, editable fields, missing-information notice, and **Create draft job**. Reopening converted inquiries links to the existing job.
-- [ ] Jobs provides text search and status filtering with an explicit zero-results state. Job workspace includes details, line-item quote editor, revision history, internal approval action, scheduling form, state actions, note form, customer drafts, and activity. Submit the latest `expected_version` on all mutations. After 409, preserve entered text, explain the conflict, and offer reload; never silently retry stale actions.
-- [ ] Quote UI offers add/remove lines, shows server-computed totals only after save, identifies draft/approved revision, labels **Illustrative CAD · Tax excluded**, and differentiates approval from customer acceptance. Disable busy actions until their requests resolve and restore controls after failures.
-- [ ] Schedule defaults to the week containing Toronto's business date; support previous/next/current week. Render a desktop week grid and a mobile list from the same assignments. Job scheduling form displays exact crew/equipment options and surfaces server conflict messages adjacent to the form.
-- [ ] Customer updates support generate/edit/save/copy. On clipboard failure, leave selectable text and a manual-copy instruction. Integrations show all three **Demo / Not connected** cards, field mappings, selected job, local preview action, and preview JSON rendered with `textContent` inside `pre`. No fake progress claiming an external send.
-- [ ] Test the browser journey through these actions: open Overview; convert an inquiry; save and approve a quote; assign free resources; add a note; start and complete the job; generate/edit/save/copy a draft; preview CRM data; refresh and verify persistence. Separately trigger a resource conflict and show its explanation.
-- [ ] Verify keyboard navigation, focus visibility, actionable labels, error recovery, and empty search results. Enter `<img src=x onerror=alert(1)>` into a note and site field; verify visible literal text without an executable node/dialog. Inspect desktop and 390px layouts, check no page-wide horizontal overflow, then restore viewport. Fix observed defects and commit with `feat: deliver responsive operations demo interface`.
+- [x] Overview displays derived metrics, upcoming assignments, unconverted inquiry cards, draft quotes needing review, and activity. Inbox shows the original sample email, a **Prepare job brief** action, editable fields, missing-information notice, and **Create draft job**. Reopening converted inquiries links to the existing job.
+- [x] Jobs provides text search and status filtering with an explicit zero-results state. Job workspace includes details, line-item quote editor, revision history, internal approval action, scheduling form, state actions, note form, customer drafts, and activity. Submit the latest `expected_version` on all mutations. After 409, preserve entered text, explain the conflict, and offer reload; never silently retry stale actions.
+- [x] Quote UI offers add/remove lines, shows server-computed totals only after save, identifies draft/approved revision, labels **Illustrative CAD · Tax excluded**, and differentiates approval from customer acceptance. Disable busy actions until their requests resolve and restore controls after failures.
+- [x] Schedule defaults to the week containing Toronto's business date; support previous/next/current week. Render a desktop week grid and a mobile list from the same assignments. Job scheduling form displays exact crew/equipment options and surfaces server conflict messages adjacent to the form.
+- [x] Customer updates support generate/edit/save/copy. On clipboard failure, leave selectable text and a manual-copy instruction. Integrations show all three **Demo / Not connected** cards, field mappings, selected job, local preview action, and preview JSON rendered with `textContent` inside `pre`. No fake progress claiming an external send.
+- [x] Test the browser journey through these actions: open Overview; convert an inquiry; save and approve a quote; assign free resources; add a note; start and complete the job; generate/edit/save/copy a draft; preview CRM data; refresh and verify persistence. Separately trigger a resource conflict and show its explanation.
+- [x] Verify keyboard navigation, focus visibility, actionable labels, error recovery, and empty search results. Enter `<img src=x onerror=alert(1)>` into a note and site field; verify visible literal text without an executable node/dialog. Inspect desktop and 390px layouts, check no page-wide horizontal overflow, then restore viewport. Fix observed defects and commit with `feat: deliver responsive operations demo interface`.
 
 ### Task 7: Reset, persistence regression, final validation, and handoff
 
@@ -354,7 +354,7 @@ export function text(tag, value, className = "") {
 
 **Interfaces:** `/api/reset` uses current scoped workspace and `confirm=true`, deletes dependent business rows in foreign-key order, reseeds once, and returns bootstrap. It does not clear other visitors or replace application schema. Read handlers never mutate existing workflow state.
 
-- [ ] Add reset/isolation tests before implementing reset:
+- [x] Add reset/isolation tests before implementing reset:
 
 ```python
 from conftest import new_job
@@ -372,14 +372,14 @@ def test_foreign_origin_cannot_mutate(client):
     assert response.status_code == 403
 ```
 
-- [ ] Run reset tests red, implement scoped reset, and wire an in-app confirmation dialog. Add oversized-body rejection, missing-Origin rejection, and scoped detail/mutation checks for every object-taking endpoint. Verify unsupported database schema startup fails without destructive repair.
-- [ ] Add the complete API journey test using helper functions through job completion and a saved draft. Dispose the first app, create a second app against the same database file, copy the original cookie into its test client, and assert the completed job, quote history, assignment, and draft remain. This verifies on-disk persistence across app lifecycle, beyond an in-memory refresh check.
-- [ ] Run `.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp=.tmp_pytest/final`. Then run `.venv\Scripts\python.exe -m compileall -q app` and `git diff --check`. Record actual counts and outputs, not predicted results. Broaden testing only for new failures or changes.
-- [ ] Write README with exact venv/install/start/test commands using the required RTK/PowerShell wrapper; database path and reset behavior; environment variables `DATABASE_URL`, `APP_ORIGIN`, `COOKIE_SECURE`; sample-only runtime; schema/version handling; local single-worker constraint. Explain that `.env.example` is configuration documentation and environment variables must be explicitly set unless a dotenv loader is intentionally implemented and tested.
-- [ ] Write DEMO as a five-minute English script: overview → inquiry → quote → schedule → progress → customer draft → integration preview. Describe what is interactive and persisted, and identify everything simulated. Write VALIDATION with completed automated/browser checks, actual runtime mode, unresolved defects if any, and deferred live/infrastructure checks. No production-ready or live-agent claims.
-- [ ] Document future public release prerequisites without provisioning resources: durable database, verified PostgreSQL locking and schema path, HTTPS cookies, workspace expiry/cleanup, rate limits, and no real customer data until authorized. The current app is local-only and public hosting is not a claimed deliverable.
-- [ ] Run a final browser walkthrough, inspect console/runtime logs, and leave the working overview tab available. Review the whole project diff against this plan. If native execution was selected, follow its required fresh review; if subagent-driven execution was selected, use its task and whole-branch review gates. Address actionable findings and retest affected behaviors.
-- [ ] Commit only project files with `test: verify complete demo journey and document handoff`. Provide the local URL, setup/doc links, test results, and explicit sample-mode limitation.
+- [x] Run reset tests red, implement scoped reset, and wire an in-app confirmation dialog. Add oversized-body rejection, missing-Origin rejection, and scoped detail/mutation checks for every object-taking endpoint. Verify unsupported database schema startup fails without destructive repair.
+- [x] Add the complete API journey test using helper functions through job completion and a saved draft. Dispose the first app, create a second app against the same database file, copy the original cookie into its test client, and assert the completed job, quote history, assignment, and draft remain. This verifies on-disk persistence across app lifecycle, beyond an in-memory refresh check.
+- [x] Run `.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp=.tmp_pytest/final`. Then run `.venv\Scripts\python.exe -m compileall -q app` and `git diff --check`. Record actual counts and outputs, not predicted results. Broaden testing only for new failures or changes.
+- [x] Write README with exact venv/install/start/test commands using the required RTK/PowerShell wrapper; database path and reset behavior; environment variables `DATABASE_URL`, `APP_ORIGIN`, `COOKIE_SECURE`; sample-only runtime; schema/version handling; local single-worker constraint. Explain that `.env.example` is configuration documentation and environment variables must be explicitly set unless a dotenv loader is intentionally implemented and tested.
+- [x] Write DEMO as a five-minute English script: overview → inquiry → quote → schedule → progress → customer draft → integration preview. Describe what is interactive and persisted, and identify everything simulated. Write VALIDATION with completed automated/browser checks, actual runtime mode, unresolved defects if any, and deferred live/infrastructure checks. No production-ready or live-agent claims.
+- [x] Document future public release prerequisites without provisioning resources: durable database, verified PostgreSQL locking and schema path, HTTPS cookies, workspace expiry/cleanup, rate limits, and no real customer data until authorized. The current app is local-only and public hosting is not a claimed deliverable.
+- [x] Run a final browser walkthrough, inspect console/runtime logs, and leave the working overview tab available. Review the whole project diff against this plan. If native execution was selected, follow its required fresh review; if subagent-driven execution was selected, use its task and whole-branch review gates. Address actionable findings and retest affected behaviors.
+- [x] Commit only project files with `test: verify complete demo journey and document handoff`. Provide the local URL, setup/doc links, test results, and explicit sample-mode limitation.
 
 ## Plan self-review
 
@@ -387,4 +387,4 @@ def test_foreign_origin_cannot_mutate(client):
 - Review focus: stale quotes in Task 3, concurrent/boundary reservations in Task 4, scoped/forged IDs in Tasks 1/2/7, HTML handling in Tasks 5/6, Toronto dates and scoped reset in Tasks 1/7.
 - Interface consistency: all domain mutations share the session/workspace signature, return updated job detail, and use `expected_version`; preview adds a `preview` field. Shared test helpers are defined before dependent tests. Quotes are ordered ascending by revision; drafts/activity ascending by creation timestamp with a stable ID tiebreaker.
 - Execution recommendation: **Native execution in this session**, followed by the required independent final review. Seven tasks share closely related job/version/transaction contracts, so one implementer avoids repeated context transfer. Subagent-driven execution remains an alternative with a fresh implementer/reviewer for each task.
-- Approval status: written design approved; implementation plan awaits user review and execution-method selection. No application code or dependencies have been created by this planning step.
+- Approval status: written design and implementation plan approved; native execution selected. All seven tasks complete. Independent final review found two Important UI issues; both were reproduced, fixed, and verified. Final suites: 47 Python and 6 frontend tests passed.

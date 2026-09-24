@@ -1,4 +1,5 @@
-import {el,status,money,day,link,button,heading,field,selectField,formError,run,activityList,labelStatus} from "./api.js";
+import {el,status,money,day,link,button,heading,field,selectField,formError,run as baseRun,watchForm,activityList,labelStatus} from "./api.js";
+const run=(buttonNode,errorNode,task)=>baseRun(buttonNode,errorNode,task,true);
 const sectionHead=(title,sub,action)=>el("div",{class:"section-head"},el("div",{},el("h2",{},title),sub?el("small",{},sub):null),action||null);
 
 function quotePanel(job,a){
@@ -32,7 +33,7 @@ function quotePanel(job,a){
     form.addEventListener("submit",e=>{e.preventDefault();run(save,error,async()=>{
       const values=[...lines.children].map(row=>Object.fromEntries([...row.querySelectorAll("input")].map(input=>[input.name,input.value])));
       await a.mutate(job,"quotes",{lines:values});a.toast("Quote revision saved. Review it before approval.");
-    });});panel.append(form);
+    });});panel.append(watchForm(form,"Quote"));
   }
   if(job.quotes.length)panel.append(el("details",{class:"section-bottom"},el("summary",{},"Quote history · "+job.quotes.length+" revision"+(job.quotes.length>1?"s":"")),
     job.quotes.slice().reverse().map(q=>el("div",{class:"revision"},el("span",{},"Revision "+q.revision+" · "+(q.state==="approved"?"Internally approved":"Draft")),el("strong",{},money(q.total))))));
@@ -54,7 +55,7 @@ function schedulingPanel(job,s,a){
       field("End date","end_date",assignment?.end_date||job.requested_end,"date",{required:true})),error,save);
   form.addEventListener("submit",e=>{e.preventDefault();run(save,error,async()=>{
     await a.mutate(job,"assignment",Object.fromEntries(new FormData(form)),"PUT");a.toast("Crew and equipment assignment saved.");
-  });});panel.append(form);return panel;
+  });});panel.append(watchForm(form,"Assignment"));return panel;
 }
 function draftPanel(job,a){
   const error=formError(),generate=button("✧  Prepare customer update",()=>run(generate,error,async()=>{
@@ -64,7 +65,7 @@ function draftPanel(job,a){
     const form=el("form",{class:"draft-block"}),err=formError(),save=el("button",{class:"button primary",type:"submit"},"Save draft");
     const subject=field("Subject","subject",d.subject,"text",{required:true,maxlength:200}),
       body=field("Message","body",d.body,"textarea",{required:true,maxlength:4000,rows:8});
-    const copy=button("Copy message",()=>run(copy,err,async()=>{
+    const copy=button("Copy message",()=>baseRun(copy,err,async()=>{
       const content=subject.querySelector("input").value+"\n\n"+body.querySelector("textarea").value;
       try{await navigator.clipboard.writeText(content);a.toast("Message copied. Nothing was sent.");}
       catch{body.querySelector("textarea").select();throw new Error("Clipboard access is unavailable. The message is selected so you can copy it manually.");}
@@ -72,7 +73,7 @@ function draftPanel(job,a){
     form.append(subject,body,err,el("div",{class:"actions"},save,copy));
     form.addEventListener("submit",e=>{e.preventDefault();run(save,err,async()=>{
       await a.mutate(job,"drafts/"+d.id,Object.fromEntries(new FormData(form)),"PUT");a.toast("Customer draft saved.");
-    });});panel.append(form);
+    });});panel.append(watchForm(form,"Customer update draft"));
   });return panel;
 }
 export function renderJob(root,job,s,a){
@@ -93,6 +94,6 @@ export function renderJob(root,job,s,a){
   const noteError=formError(),noteForm=el("form",{}),noteSave=el("button",{class:"button",type:"submit"},"Save note");
   noteForm.append(field("Operational note","text","","textarea",{required:true,maxlength:4000,placeholder:"Site access, customer updates, or an office handoff…",rows:3}),noteError,noteSave);
   noteForm.addEventListener("submit",e=>{e.preventDefault();run(noteSave,noteError,async()=>{await a.mutate(job,"notes",Object.fromEntries(new FormData(noteForm)));a.toast("Operational note saved.");});});
-  const activity=el("section",{class:"panel"},sectionHead("Notes & activity","Changes and handoffs, in one place"),noteForm,activityList(job.activity));
+  const activity=el("section",{class:"panel"},sectionHead("Notes & activity","Changes and handoffs, in one place"),watchForm(noteForm,"Operational note"),activityList(job.activity,[],true));
   root.append(el("div",{class:"job-workspace"},el("div",{class:"stack"},quotePanel(job,a),draftPanel(job,a)),el("div",{class:"stack"},detail,schedulingPanel(job,s,a),activity)));
 }
