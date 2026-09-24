@@ -12,7 +12,7 @@ The user approved a free Render web service in My Workspace and a separate free 
 - HTTPS origins always issue Secure, HttpOnly, SameSite=Lax cookies and HSTS.
 - Render refuses startup with SQLite; restart/redeployment must not erase demo edits.
 
-The source repository is private. render.yaml records the service settings; direct service creation uses the same build/start configuration. Database credentials are configured separately.
+The source repository is public with explicit user approval so Render can clone it without additional GitHub access. render.yaml records the service settings; direct service creation uses the same build/start configuration. Database credentials are configured separately.
 
 ## Data and limits
 

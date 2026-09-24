@@ -71,6 +71,6 @@ The sample assistant retrieves prepared example briefs and composes messages fro
 
 ## Public deployment
 
-The approved public setup uses Render Free with a dedicated Neon PostgreSQL database. See docs/DEPLOYMENT.md for configuration, retention, capacity limits, test isolation and free-tier cold starts. The source repository stays private. Use VALIDATION.md for current deployment evidence.
+The approved public setup uses Render Free with a dedicated Neon PostgreSQL database. See docs/DEPLOYMENT.md for configuration, retention, capacity limits, test isolation and free-tier cold starts. The user approved publishing this sample-only source repository. Use VALIDATION.md for current deployment evidence.
 
 Live QuickBooks, email/calendar, CRM OAuth and LLM providers require separate credentials, verified contracts, permissions and acceptance tests. The previews are illustrative mappings, not vendor-validated API payloads or synchronization receipts.
