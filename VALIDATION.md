@@ -1,69 +1,64 @@
 # Validation record
 
-Validated locally on September 23, 2026 (America/Toronto).
+## Public deployment — September 24, 2026
 
-## Scope and runtime
+**Live demo:** https://frank-operations-demo.onrender.com
+**Source:** https://github.com/webpony2016/Frank-DB-Agent
+**Runtime:** sample-only. No live LLM call, email delivery, OAuth business connection or external vendor API call.
 
-- Python 3.13.5; approved PowerShell 7.6.6 through RTK.
-- FastAPI application, local SQLite schema version 1, one Uvicorn worker.
-- Runtime is sample-only. No API key, live model call, email send, OAuth connection, vendor API request, or public deployment was used.
-- Exact installed Python packages are recorded in requirements.lock.txt.
+- Render service frank-operations-demo, Free plan, Virginia, one Python 3.13.5 Uvicorn worker.
+- Dedicated Neon project frank-operations-demo, Free plan, US East 1. Built-in Neon Auth disabled.
+- Hosted data is PostgreSQL; local SQLite data was not uploaded.
+- Render reported live for initial deploy dep-daqaa9942hec738umq00 and health-setting redeploy dep-daqabtnf3r2c73akqer0.
+- Service health check is /health. HTTPS returns mode=sample and schema_version=1.
+- Application code reviewed and tested at b816a80; later commits update deployment documentation.
 
-## Automated evidence
+### Automated checks
 
-The final Python test run reported **47 passed** in 23.44 seconds, plus **6 passed** frontend regressions using Node 22.17.1. The Python suite covers:
+- **56 tests passed** in PostgreSQL test mode, 565.99 seconds. Shared fixtures use independent random schemas in the real Neon database, covering persisted workflows, isolation, quote boundaries, stale versions, concurrent scheduling, reset, expiry and quotas. Standalone local-file tests still use SQLite by design.
+- SQLite full suite: **55 passed** before the added maximum-valid-quote regression; the final hosting subset including that regression: **9 passed**.
+- Node frontend regressions: **6 passed**.
+- Python compileall and Git whitespace checks passed.
+- The eight initial hosting tests were observed failing before implementation; all pass after the changes. Added a valid CAD 100 million quote round-trip to exercise PostgreSQL BIGINT.
+- One pinned Starlette TestClient deprecation warning remains; it concerns the test adapter, not a live browser failure.
 
-- Workspace creation, isolation, forged cookies, cookie flags and unknown-schema rejection.
-- Editable/idempotent inquiry conversion and unsupported-example manual entry.
-- Decimal money, per-line rounding, invalid values, total bounds, quote revisions and stale approval.
-- Crew/equipment overlap including boundary dates, self-rescheduling and true concurrent database sessions: one winner, one conflict, one event.
-- Job transition restrictions, completed-job immutability and stale assignment rejection.
-- Saved customer drafts, long-title subject bounds, text preservation and local offline previews.
-- Confirmation-gated per-workspace reset, origin checks, request size bounds, and foreign IDs across mutation endpoints.
-- Completed future assignments excluded from upcoming totals.
-- Full job journey persisted and read through a newly constructed application instance.
-- HTML shell and linked static assets are served.
+### Live HTTP checks
 
-One upstream warning remains: Starlette 1.7.0 deprecates its httpx TestClient adapter in favor of httpx2. The tests pass with the pinned dependency set; this is a test-tool deprecation, not a browser/runtime failure.
+A dedicated disposable visitor completed the actual hosted API journey:
 
-Python compileall and JavaScript syntax checks passed. Git whitespace checks passed after removing trailing blank lines. The independent-review findings and their regressions are recorded below.
+1. Secure, HttpOnly, SameSite=Lax cookie, HSTS and no-store API responses.
+2. A second visitor receives different records; foreign job IDs return 404.
+3. Mutations from another origin return 403.
+4. Convert an inquiry, save CAD 251.10, approve, assign resources.
+5. Competing reservation receives 409.
+6. Start and complete the job, save a note, generate and edit a customer draft.
+7. CRM preview returns mode=sample, connected=false and sent=false.
+8. After the health-setting redeploy finished live, reusing the original visitor cookie returned the exact saved job, quote, assignment, activities and message. This verifies persistence across a real hosted process replacement.
+9. Render error-log inspection returned no error entries during the initial checks.
 
-## Browser evidence
+### Public browser checks
 
-Verified in Chrome against http://127.0.0.1:8000:
+Chrome loaded the public HTTPS endpoint and initialized its own workspace. The browser journey converted Cedar Ridge access road, saved a 2 × CAD 125.55 quote, approved it, scheduled Crew Alpha/Rig 01 for October 1–2, started and completed the job, then generated and edited a customer update. A page reload retained the completed job and edited message. Console inspection returned no errors or warnings. Reset restored the browser visitor's initial fictional examples, and the overview was left open.
 
-1. Overview derives current metrics from saved sample records.
-2. Inquiry brief is editable; converting it creates FD-1047 and reduces the pending inquiry count.
-3. Quantity 2 at CAD 125.55 saves a CAD 251.10 quote. Internal approval unlocks scheduling.
-4. Booking Crew Alpha over its existing dates returns a specific conflict. Choosing available dates succeeds.
-5. Scheduled → In progress → Completed updates the timeline and locks quote/assignment editing.
-6. An HTML-shaped note is visibly literal text: no image node or JavaScript dialog was created.
-7. Customer update generation, editing, saving, and copying all work. The visible copy feedback confirms nothing was sent.
-8. Browser refresh and a server restart preserve the completed job and edited message.
-9. CRM local preview shows the saved completed status, connected=false and sent=false.
-10. Search produces a useful no-results state.
-11. At an actual 390 CSS-pixel viewport, overview, schedule list and job workspace have no page-wide horizontal overflow. Browser zoom required a 488-pixel viewport override to obtain 390 CSS pixels; the override was reset afterward.
-12. The skip link focuses the current main content without navigating away.
-13. Reset confirmation replaces only the test visitor's sample workspace; the reset success message is visible and initial counts return.
-14. Browser console inspection returned no warning/error entries during the tested journey and after the final fixes.
-15. Saving a note while quote quantity is 999 opens the unsaved-edits decision. Keep editing retains both fields and record version; explicit discard saves the note and restores the saved quote. An edited customer message is protected by the same decision.
-16. Show all activity reveals a site-access note hidden behind more than eight newer events; Show recent activity collapses it again.
+The original local build's 390 CSS-pixel layout verification remains applicable to the unchanged frontend assets. A new hosted mobile-size check was not counted: the viewport override did not affect the intended public tab and was reset.
 
-The browser test workspace was reset after verification, leaving a fresh demonstration. Automated tests use separate temporary databases and never reset the user's application database.
+### Independent deployment review
 
-## Limits
+A separate read-only review of the public-hosting changes found **no Critical or Important defects**. It checked transaction-level PostgreSQL locking, atomic capacity enforcement, 64-bit quote cents, server-enforced expiry, cleanup order, HTTPS settings, Render's SQLite guard and temporary test-schema isolation. The reviewer did not read credentials or operate cloud resources.
 
-- No public endpoint or hosted database has been provisioned.
-- PostgreSQL migrations/locking, multiple application workers, abuse limits and retention cleanup are deferred.
-- Real customer accounts, live AI accuracy, QuickBooks schema compliance, CRM/calendar providers, and email delivery are not validated.
-- Generated operational text is a reviewable draft. No engineering or blasting guidance is generated.
-- The seven-day visitor cookie is a convenience scope for fictional demo data, not production user authentication. Its expiry is browser-enforced; a copied token is not server-revoked on that schedule. Server expiry, revocation and cleanup belong to the public-release work.
+The reviewer verified that Render's native Python runtime supplies FORWARDED_ALLOW_IPS, consumed by Uvicorn. Actual shared quotas, provider uptime and cold-start time are not guaranteed by these application checks.
 
-## Independent review
+## Original local MVP — September 23, 2026
 
-A fresh independent reviewer examined the complete project and reran the 47 Python tests. The verdict was With fixes: no Critical findings, two Important findings, and no Minor findings.
+The local baseline passed 47 Python tests and 6 frontend tests, plus the inquiry-to-completion browser journey, clipboard feedback, literal HTML rendering, empty search, reload/server-restart persistence, keyboard skip focus and a 390 CSS-pixel responsive check.
 
-1. An unrelated save could discard another form: reproduced in Chrome (quantity 999 became 1 after saving a note). Added regression cases for quote/message edits, submitted-form exclusion and repeated quote fields; observed RED, implemented explicit keep/discard choice and in-flight edit blocking, then GREEN. Browser cancel/discard/message cases passed.
-2. Old notes were inaccessible beyond eight events: reproduced in Chrome. Added recent/full-history regressions; observed RED, implemented the full-history toggle, then GREEN. Browser expand/collapse passed.
+The original whole-project reviewer found two Important UI issues: saving one form discarded unsaved edits elsewhere; notes older than eight events were inaccessible. Both were reproduced, covered with RED-to-GREEN regressions and fixed with an explicit keep/discard choice and expandable activity history. No Minor findings were deferred.
 
-All Important findings were addressed in one fix pass and the complete suites passed afterward. There was no second reviewer pass. No minors were deferred. Scope decisions and costs are recorded in docs/implementation-record.md.
+## Current limits
+
+- Render Free sleeps with inactivity. A cold start may delay the first visit by around a minute or longer.
+- Workspaces expire seven days after creation. Expired tokens are rejected immediately; record cleanup occurs when a new workspace is created.
+- Limits: 100 active workspaces, 200 activity records per workspace, 120 API requests per minute per network address. Rate counters are in-memory and reset with the single process.
+- This is a fictional-data public demo, not a production authentication or engineering system. Do not enter real customer information.
+- Live AI accuracy, QuickBooks/CRM/calendar vendor contracts, email delivery, paid hosting, multi-worker scaling and distributed abuse controls are outside this delivery.
+- Historical deployment deferrals in docs/implementation-record.md describe the earlier local-only milestone; PostgreSQL, hosting, session expiry and basic limits are now implemented as documented above.

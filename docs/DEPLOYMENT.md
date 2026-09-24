@@ -2,6 +2,9 @@
 
 The user approved a free Render web service in My Workspace and a separate free Neon database, provisioned through the user's existing Vercel-managed Neon installation. This is a fictional-data client demonstration.
 
+**Live URL:** https://frank-operations-demo.onrender.com
+**Source:** https://github.com/webpony2016/Frank-DB-Agent
+
 ## Runtime
 
 - One FastAPI/Uvicorn worker on Render Free, Virginia.
@@ -40,4 +43,4 @@ Render Free sleeps after inactivity, so the first request after sleep may wait f
 
 ## Verification status
 
-Final deployed URL, test counts, independent-review findings and live browser evidence are recorded in VALIDATION.md after deployment. The original local delivery record remains historical.
+Deployment is live; 56 PostgreSQL-mode tests and 6 frontend tests passed. HTTPS isolation, the full hosted workflow and persistence after a real redeployment were verified. Details are recorded in VALIDATION.md. The original local delivery record remains historical.

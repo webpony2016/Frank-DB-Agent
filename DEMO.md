@@ -1,5 +1,7 @@
 # A five-minute client walkthrough
 
+Open https://frank-operations-demo.onrender.com before the call. The free service may need time to wake after inactivity.
+
 **Opening:** “This is an independent concept for your operations team. All projects and prices are fictional. The workflow and persistence are working; the assistant uses prepared examples, and integrations are local previews.”
 
 ## 1. Understand the day — Overview

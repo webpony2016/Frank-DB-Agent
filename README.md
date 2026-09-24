@@ -4,6 +4,8 @@ An independent concept demo for Frank's Drilling & Blasting: an English operatio
 
 **Sample data only. No live AI calls, external integrations, or messages sent.** Customers, sites, projects and prices are fictional.
 
+[Open the public demo](https://frank-operations-demo.onrender.com) — no login required. Free hosting may take around a minute or longer to wake after inactivity.
+
 ## Run locally on Windows
 
 Tested with Python 3.13.5. PowerShell 7.6.6 was explicitly approved for this session. All commands run through RTK from this project directory.
@@ -27,7 +29,7 @@ The running server must restart after Python changes. Browser assets load on ref
 - Decimal quote calculations, immutable revisions, internal approval, and stale-version protection.
 - Whole-day crew and equipment assignments with inclusive date conflict checking.
 - Job progression, operational notes, expandable activity history, editable customer drafts, and clipboard copying.
-- Illustrative QuickBooks, email/calendar and CRM payload previews stored locally.
+- Illustrative QuickBooks, email/calendar and CRM payload previews stored within the demo database.
 - Per-visitor workspaces, responsive pages, and a reset action limited to the current workspace.
 
 When another job form has unsaved edits, saving asks whether to keep editing or explicitly discard those other edits. Save changes before navigating away or reloading. A fresh quote revision needs approval again. Quotes and assignments become read-only after work starts; quotes also lock once a job is scheduled. An internal approval is not customer acceptance. Totals are illustrative CAD, before tax. Each quote line is rounded to cents using ROUND_HALF_UP, then the rounded lines are summed.
@@ -36,9 +38,9 @@ When another job form has unsaved edits, saving asks whether to keep editing or 
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| DATABASE_URL | sqlite:///data/frank.db | File-backed local SQLite database |
-| APP_ORIGIN | http://127.0.0.1:8000 | Exact permitted host/origin for browser mutations |
-| COOKIE_SECURE | false | Set true only for a configured HTTPS deployment |
+| DATABASE_URL | sqlite:///data/frank.db | Local SQLite or hosted PostgreSQL connection |
+| APP_ORIGIN | RENDER_EXTERNAL_URL when hosted, otherwise http://127.0.0.1:8000 | Exact permitted host/origin for browser mutations |
+| COOKIE_SECURE | false locally; automatically true for HTTPS | Secure visitor cookie |
 
 **.env.example is documentation; the application does not load .env files automatically.** Set variables explicitly before launching when overriding defaults.
 
