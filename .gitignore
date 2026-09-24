@@ -1,0 +1,10 @@
+.venv/
+.uv-cache/
+data/
+.env
+.pytest_cache/
+__pycache__/
+.tmp_pytest/
+.superpowers/
+*.log
+*.pyc
