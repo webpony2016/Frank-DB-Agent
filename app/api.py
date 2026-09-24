@@ -49,3 +49,20 @@ def quote_approve(job_id: str, quote_id: str, data: VersionInput, scope: Scope =
     approve_quote(scope.session, scope.workspace_id, job_id, quote_id, data.expected_version)
     return get_job_detail(scope.session, scope.workspace_id, job_id)
 
+
+from .schemas import AssignmentInput, StatusInput
+from .scheduling import assign_job
+from .jobs import transition_job
+
+
+@router.put("/jobs/{job_id}/assignment")
+def assignment_save(job_id: str, data: AssignmentInput, scope: Scope = Depends(context)):
+    assign_job(scope.session, scope.workspace_id, job_id, data)
+    return get_job_detail(scope.session, scope.workspace_id, job_id)
+
+
+@router.post("/jobs/{job_id}/status")
+def status_save(job_id: str, data: StatusInput, scope: Scope = Depends(context)):
+    transition_job(scope.session, scope.workspace_id, job_id, data.expected_version, data.status)
+    return get_job_detail(scope.session, scope.workspace_id, job_id)
+

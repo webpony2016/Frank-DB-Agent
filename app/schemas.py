@@ -39,3 +39,23 @@ class QuoteLineInput(Input):
 class QuoteInput(VersionInput):
     lines: list[QuoteLineInput] = Field(min_length=1, max_length=30)
 
+
+from typing import Literal
+
+
+class AssignmentInput(VersionInput):
+    crew_id: Short
+    equipment_id: Short
+    start_date: date
+    end_date: date
+
+    @model_validator(mode="after")
+    def dates(self):
+        if not 0 <= (self.end_date - self.start_date).days <= 365:
+            raise ValueError("Choose an end date on or after the start, within 366 days.")
+        return self
+
+
+class StatusInput(VersionInput):
+    status: Literal["in_progress", "completed"]
+

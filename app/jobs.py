@@ -38,3 +38,14 @@ def convert_inquiry(session, workspace_id, inquiry_id, brief):
     session.flush()
     event(session, job, "intake", "Reviewed inquiry converted to a draft job.")
     return job, True
+
+
+def transition_job(session, workspace_id, job_id, expected_version, status):
+    job = require_job(session, workspace_id, job_id)
+    check_version(job, expected_version)
+    if {"scheduled": "in_progress", "in_progress": "completed"}.get(job.status) != status:
+        raise DomainError(409, "Follow the job sequence: scheduled, in progress, then completed.")
+    job.status = status
+    event(session, job, "status", f"Job marked {status.replace('_', ' ')}.")
+    return job
+
