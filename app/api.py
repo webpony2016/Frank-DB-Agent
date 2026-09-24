@@ -66,3 +66,37 @@ def status_save(job_id: str, data: StatusInput, scope: Scope = Depends(context))
     transition_job(scope.session, scope.workspace_id, job_id, data.expected_version, data.status)
     return get_job_detail(scope.session, scope.workspace_id, job_id)
 
+
+from .schemas import NoteInput, DraftInput, PreviewInput
+from .communications import add_note, create_draft, update_draft
+from .integrations import integration_list, preview_integration
+
+
+@router.post("/jobs/{job_id}/notes")
+def note_save(job_id: str, data: NoteInput, scope: Scope = Depends(context)):
+    add_note(scope.session, scope.workspace_id, job_id, data.expected_version, data.text)
+    return get_job_detail(scope.session, scope.workspace_id, job_id)
+
+
+@router.post("/jobs/{job_id}/drafts")
+def draft_create(job_id: str, data: VersionInput, scope: Scope = Depends(context)):
+    create_draft(scope.session, scope.workspace_id, job_id, data.expected_version)
+    return get_job_detail(scope.session, scope.workspace_id, job_id)
+
+
+@router.put("/jobs/{job_id}/drafts/{draft_id}")
+def draft_save(job_id: str, draft_id: str, data: DraftInput, scope: Scope = Depends(context)):
+    update_draft(scope.session, scope.workspace_id, job_id, draft_id, data)
+    return get_job_detail(scope.session, scope.workspace_id, job_id)
+
+
+@router.get("/integrations")
+def integrations(scope: Scope = Depends(context)):
+    return integration_list(scope.session, scope.workspace_id)
+
+
+@router.post("/jobs/{job_id}/integration-previews")
+def integration_preview(job_id: str, data: PreviewInput, scope: Scope = Depends(context)):
+    preview = preview_integration(scope.session, scope.workspace_id, job_id, data.expected_version, data.connector)
+    return dict(get_job_detail(scope.session, scope.workspace_id, job_id), preview=preview)
+

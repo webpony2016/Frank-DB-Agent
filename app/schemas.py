@@ -59,3 +59,17 @@ class AssignmentInput(VersionInput):
 class StatusInput(VersionInput):
     status: Literal["in_progress", "completed"]
 
+
+
+class NoteInput(VersionInput):
+    text: str = Field(min_length=1, max_length=4000)
+
+
+class DraftInput(VersionInput):
+    subject: Short
+    body: str = Field(min_length=1, max_length=4000)
+
+
+class PreviewInput(VersionInput):
+    connector: Literal["quickbooks", "email_calendar", "crm"]
+
