@@ -3,6 +3,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from .config import Settings
 from .db import make_engine, initialize
@@ -54,6 +56,14 @@ def create_app(database_url=None, origin=None):
         return {"status": "ok", "mode": "sample", "schema_version": 1}
 
     application.include_router(router)
+    base = Path(__file__).parent
+    application.mount("/static", StaticFiles(directory=base / "static"), name="static")
+    templates = Jinja2Templates(directory=base / "templates")
+
+    @application.get("/")
+    def home(request: Request):
+        return templates.TemplateResponse(request=request, name="index.html")
+
     return application
 
 
