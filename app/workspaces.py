@@ -33,3 +33,14 @@ def context(request: Request, response: Response):
             response.set_cookie("frank_workspace", token, httponly=True, samesite="lax", secure=request.app.state.settings.cookie_secure,
                                 max_age=60 * 60 * 24 * 7)
         yield Scope(session, workspace.id)
+
+
+def reset_workspace(session, workspace_id):
+    from sqlalchemy import delete
+    from .models import (QuoteLine, Quote, Assignment, CommunicationDraft, ActivityEvent,
+                         IntegrationPreview, Job, Inquiry, Customer, Crew, Equipment)
+    for model in (QuoteLine, Quote, Assignment, CommunicationDraft, ActivityEvent,
+                  IntegrationPreview, Job, Inquiry, Customer, Crew, Equipment):
+        session.execute(delete(model).where(model.workspace_id == workspace_id))
+    session.flush()
+    seed_workspace(session, workspace_id, business_date())

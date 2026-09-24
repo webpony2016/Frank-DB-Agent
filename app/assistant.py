@@ -25,5 +25,4 @@ def customer_update(session, workspace_id, job):
     body = (f"Hi {customer.contact},\n\nHere is an update on {job.title} at {job.site}.\n\n"
             f"Current project status: {job.status.replace('_', ' ')}.\n{schedule}\n\n"
             "Please let us know if your site access or project requirements have changed.\n\nThank you,\nOperations team")
-    return f"Project update — {job.title}", body
-
+    return f"Project update — {job.title}"[:200], body

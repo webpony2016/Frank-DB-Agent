@@ -26,7 +26,7 @@ async function render(){
   }catch(error){if(token!==renderToken)return;root.replaceChildren(empty("Workspace unavailable",error.message,el("button",{class:"button primary",onclick:start},"Try again")));}
 }
 async function start(){try{await refresh();}catch(error){root.replaceChildren(empty("Let's reconnect",error.message,el("button",{class:"button primary",onclick:start},"Try again")));}}
-window.addEventListener("hashchange",()=>{if(state)render();});
+window.addEventListener("hashchange",()=>{if(state)render().then(()=>window.scrollTo(0,0));});
 const guide=document.querySelector("#guide"),reset=document.querySelector("#reset-dialog");
 document.querySelector("#guide-button").addEventListener("click",()=>guide.showModal());
 document.querySelector("#reset-button").addEventListener("click",()=>reset.showModal());
@@ -35,3 +35,5 @@ document.querySelector("#reset-confirm").addEventListener("click",event=>run(eve
   await api("/api/reset",{method:"POST",body:JSON.stringify({confirm:true})});reset.close();location.hash="overview";await refresh();toast("Your sample workspace has been reset.");
 }));
 start();
+
+document.querySelector(".skip").addEventListener("click",event=>{event.preventDefault();document.querySelector("#main").focus();});

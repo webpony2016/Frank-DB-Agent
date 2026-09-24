@@ -100,3 +100,12 @@ def integration_preview(job_id: str, data: PreviewInput, scope: Scope = Depends(
     preview = preview_integration(scope.session, scope.workspace_id, job_id, data.expected_version, data.connector)
     return dict(get_job_detail(scope.session, scope.workspace_id, job_id), preview=preview)
 
+
+from .schemas import ResetInput
+from .workspaces import reset_workspace
+
+
+@router.post("/reset")
+def reset(data: ResetInput, scope: Scope = Depends(context)):
+    reset_workspace(scope.session, scope.workspace_id)
+    return bootstrap(scope.session, scope.workspace_id)

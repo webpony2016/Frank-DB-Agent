@@ -73,3 +73,7 @@ class DraftInput(VersionInput):
 class PreviewInput(VersionInput):
     connector: Literal["quickbooks", "email_calendar", "crm"]
 
+
+
+class ResetInput(Input):
+    confirm: Literal[True]

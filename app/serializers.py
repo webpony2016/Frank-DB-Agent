@@ -36,6 +36,7 @@ def bootstrap(session, workspace_id):
             current = session.scalar(select(Quote).where(Quote.job_id == job.id, Quote.workspace_id == workspace_id).order_by(Quote.revision.desc()))
             draft_cents += current.total_cents if current else 0
     assignments = rows(session, Assignment, workspace_id)
+    active_ids = {j.id for j in jobs if j.status != "completed"}
     return dict(mode="sample", business_date=business_date().isoformat(),
                 customers=[record(c) for c in rows(session, Customer, workspace_id)], inquiries=inquiries,
                 jobs=[job_summary(session, j) for j in jobs],
@@ -43,7 +44,7 @@ def bootstrap(session, workspace_id):
                 equipment=[record(e) for e in rows(session, Equipment, workspace_id)],
                 assignments=[record(a) for a in assignments],
                 metrics=dict(active_jobs=sum(j.status != "completed" for j in jobs), inquiries=sum(not i["job_id"] for i in inquiries),
-                             draft_quote_value=money(draft_cents), upcoming=sum(a.end_date >= business_date() for a in assignments)),
+                             draft_quote_value=money(draft_cents), upcoming=sum(a.end_date >= business_date() and a.job_id in active_ids for a in assignments)),
                 activity=[record(e) for e in sorted(rows(session, ActivityEvent, workspace_id), key=lambda e: (e.created_at, e.id))][-20:])
 
 
@@ -64,4 +65,3 @@ def get_job_detail(session, workspace_id, job_id):
     result["activity"] = [record(e) for e in session.scalars(select(ActivityEvent).where(
         ActivityEvent.workspace_id == workspace_id, ActivityEvent.job_id == job_id).order_by(ActivityEvent.created_at, ActivityEvent.id))]
     return result
-

@@ -6,7 +6,7 @@ function overview(root,s,a){
   root.append(el("div",{class:"welcome-strip"},el("span",{class:"strip-icon","aria-hidden":"true"},"↗"),el("div",{},el("strong",{},"One workspace. From inquiry to completion."),el("p",{},"Try a complete workflow with sample projects, reviewed quotes and conflict-aware scheduling.")),link("Start the walkthrough","#inbox")));
   const metrics=[["Active jobs",s.metrics.active_jobs,"Across your job pipeline","▤"],["Awaiting review",s.metrics.inquiries,"Customer inquiries in your inbox","▱"],["Draft quote value",money(s.metrics.draft_quote_value),"Illustrative CAD · Tax excluded","＄"],["Upcoming assignments",s.metrics.upcoming,"Scheduled or underway","▦"]];
   root.append(el("div",{class:"stats"},metrics.map(([title,value,caption,icon])=>el("div",{class:"stat"},el("div",{class:"stat-label"},title,el("span",{class:"stat-symbol","aria-hidden":"true"},icon)),el("div",{class:"stat-value"},value),el("div",{class:"stat-foot"},el("b",{},"●"),caption)))));
-  const upcoming=s.assignments.filter(x=>x.end_date>=s.business_date).sort((x,y)=>x.start_date.localeCompare(y.start_date));
+  const upcoming=s.assignments.filter(x=>x.end_date>=s.business_date&&s.jobs.find(j=>j.id===x.job_id)?.status!=="completed").sort((x,y)=>x.start_date.localeCompare(y.start_date));
   const schedule=el("section",{class:"panel"},sectionHead("Coming up on site","Toronto business dates · All-day assignments",link("View schedule ↗","#schedule")));
   upcoming.forEach(x=>{
     const j=s.jobs.find(j=>j.id===x.job_id),crew=s.crews.find(c=>c.id===x.crew_id),equipment=s.equipment.find(e=>e.id===x.equipment_id);

@@ -67,3 +67,18 @@ def test_foreign_draft_is_inaccessible(client, other_client):
     draft = result.json()["drafts"][-1]
     assert other_client.put(f"/api/jobs/{b['id']}/drafts/{draft['id']}",
         json={"expected_version":b["version"],"subject":"x","body":"x"}).status_code == 404
+
+
+def test_generated_subject_can_be_saved_for_maximum_title(client, app):
+    from app.db import transaction
+    from app.models import Job
+    job = new_job(client)
+    with transaction(app.state.engine, write=True) as session:
+        session.get(Job, job["id"]).title = "X" * 200
+    path = f"/api/jobs/{job['id']}"
+    response = client.post(path+"/drafts", json={"expected_version":job["version"]})
+    assert response.status_code == 200
+    job = response.json()
+    draft = job["drafts"][-1]
+    response = client.put(path+"/drafts/"+draft["id"], json={"expected_version":job["version"],"subject":draft["subject"],"body":draft["body"]})
+    assert response.status_code == 200

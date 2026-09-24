@@ -55,4 +55,3 @@ def assignment_fields(client):
     boot = client.get("/api/bootstrap").json()
     day = (date.fromisoformat(boot["business_date"]) + timedelta(days=90)).isoformat()
     return dict(crew_id=boot["crews"][0]["id"], equipment_id=boot["equipment"][0]["id"], start_date=day, end_date=day)
-

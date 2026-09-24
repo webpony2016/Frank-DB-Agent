@@ -48,4 +48,3 @@ def transition_job(session, workspace_id, job_id, expected_version, status):
     job.status = status
     event(session, job, "status", f"Job marked {status.replace('_', ' ')}.")
     return job
-
