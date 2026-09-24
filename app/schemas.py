@@ -26,3 +26,16 @@ class JobBriefInput(Input):
 
 class VersionInput(Input):
     expected_version: int = Field(ge=1, strict=True)
+
+from decimal import Decimal
+
+
+class QuoteLineInput(Input):
+    description: str = Field(min_length=1, max_length=300)
+    quantity: Decimal = Field(ge=0, le=100000, decimal_places=3, allow_inf_nan=False)
+    unit_price: Decimal = Field(ge=0, le=1000000, decimal_places=2, allow_inf_nan=False)
+
+
+class QuoteInput(VersionInput):
+    lines: list[QuoteLineInput] = Field(min_length=1, max_length=30)
+

@@ -32,3 +32,27 @@ def new_job(client):
     assert response.status_code == 201, response.text
     return response.json()
 
+
+
+def save_quote(client, job, price="125.55"):
+    response = client.post(f"/api/jobs/{job['id']}/quotes", json={"expected_version": job["version"],
+        "lines": [{"description": "Illustrative mobilization", "quantity": "2", "unit_price": price}]})
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def approved_job(client):
+    job = save_quote(client, new_job(client))
+    response = client.post(f"/api/jobs/{job['id']}/quotes/{job['quotes'][-1]['id']}/approve",
+                           json={"expected_version": job["version"]})
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+
+def assignment_fields(client):
+    from datetime import date, timedelta
+    boot = client.get("/api/bootstrap").json()
+    day = (date.fromisoformat(boot["business_date"]) + timedelta(days=90)).isoformat()
+    return dict(crew_id=boot["crews"][0]["id"], equipment_id=boot["equipment"][0]["id"], start_date=day, end_date=day)
+
