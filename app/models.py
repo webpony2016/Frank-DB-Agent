@@ -1,6 +1,6 @@
 from datetime import date, datetime, timezone
 from uuid import uuid4
-from sqlalchemy import String, Text, ForeignKey, UniqueConstraint, JSON
+from sqlalchemy import String, Text, ForeignKey, UniqueConstraint, JSON, BigInteger
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -73,7 +73,7 @@ class Quote(Scoped, Base):
     job_id: Mapped[str] = mapped_column(ForeignKey("jobs.id"))
     revision: Mapped[int]
     state: Mapped[str] = mapped_column(default="draft")
-    total_cents: Mapped[int]
+    total_cents: Mapped[int] = mapped_column(BigInteger)
     created_at: Mapped[str] = mapped_column(default=now)
 
 
@@ -84,7 +84,7 @@ class QuoteLine(Scoped, Base):
     description: Mapped[str]
     quantity: Mapped[str]
     unit_price: Mapped[str]
-    total_cents: Mapped[int]
+    total_cents: Mapped[int] = mapped_column(BigInteger)
 
 
 class Crew(Scoped, Base):

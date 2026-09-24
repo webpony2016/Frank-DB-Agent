@@ -1,11 +1,33 @@
 import pytest
+import os
+from uuid import uuid4
 from fastapi.testclient import TestClient
 
 
 @pytest.fixture
 def app(tmp_path):
     from app.main import create_app
-    return create_app(f"sqlite:///{tmp_path / 'test.db'}", "http://testserver")
+    pg_url = os.getenv("TEST_DATABASE_URL")
+    if not pg_url:
+        yield create_app(f"sqlite:///{tmp_path / 'test.db'}", "http://testserver")
+        return
+    from app.db import make_engine
+    from sqlalchemy.engine import make_url
+    from sqlalchemy.schema import CreateSchema, DropSchema
+    schema = "frank_test_" + uuid4().hex
+    admin = make_engine(pg_url)
+    with admin.begin() as connection:
+        connection.execute(CreateSchema(schema))
+    test_url = make_url(pg_url).update_query_dict({"options": "-csearch_path=" + schema}).render_as_string(hide_password=False)
+    application = create_app(test_url, "http://testserver")
+    try:
+        yield application
+    finally:
+        application.state.engine.dispose()
+        # This fixture owns only its random test schema; never public/demo rows.
+        with admin.begin() as connection:
+            connection.execute(DropSchema(schema, cascade=True))
+        admin.dispose()
 
 
 @pytest.fixture

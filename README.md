@@ -48,9 +48,9 @@ rtk "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -Command '$env:A
 
 SQLite schema version 1 is initialized only for a fresh database. An unknown schema/version fails startup rather than replacing data. Back up data/frank.db with the server stopped. Reset sample data uses the application dialog; it never resets another visitor's workspace.
 
-A random HTTP-only cookie identifies each workspace; only its hash is stored in the database. The browser cookie expires after seven days; the server does not independently revoke a copied token after seven days. Losing the cookie starts a new workspace; this demo has no account recovery. Database rows are retained until a future retention policy is implemented. Do not enter real customer data.
+A random HTTP-only cookie identifies each workspace; only its hash is stored in the database. The cookie and server-side workspace access expire seven days after workspace creation, including replay of a copied token. Losing the cookie starts a new workspace; this demo has no account recovery. Expired workspace rows are cleaned when a new visitor workspace is created. Do not enter real customer data.
 
-The initial SQLite implementation uses one Uvicorn worker, explicit write transactions, and a bounded busy timeout. It accepts DATABASE_URL as configuration but deliberately rejects non-SQLite databases: PostgreSQL schema/locking behavior has not been implemented or verified.
+Local SQLite and hosted PostgreSQL are supported. Use one Uvicorn worker. SQLite uses explicit write transactions and a bounded busy timeout; PostgreSQL uses transaction advisory locks to serialize demo writes. Render refuses SQLite to prevent loss on its ephemeral filesystem. HTTPS enables secure cookies automatically.
 
 ## Verification
 
@@ -69,8 +69,8 @@ FastAPI serves a Jinja2 HTML shell, plain JavaScript/CSS, and workspace-scoped J
 
 The sample assistant retrieves prepared example briefs and composes messages from saved job facts. Unrecognized examples request manual entry. No agent framework or model endpoint is invoked.
 
-## Later public deployment
+## Public deployment
 
-This delivery is local; no public hosting has been provisioned. Before a public release: select durable storage, implement and verify any PostgreSQL migration/locking path, configure HTTPS and secure cookies, add workspace retention/cleanup and abuse limits, then repeat browser and isolation tests against the deployment.
+The approved public setup uses Render Free with a dedicated Neon PostgreSQL database. See docs/DEPLOYMENT.md for configuration, retention, capacity limits, test isolation and free-tier cold starts. The source repository stays private. Use VALIDATION.md for current deployment evidence.
 
 Live QuickBooks, email/calendar, CRM OAuth and LLM providers require separate credentials, verified contracts, permissions and acceptance tests. The previews are illustrative mappings, not vendor-validated API payloads or synchronization receipts.

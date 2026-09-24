@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlparse
+from time import monotonic
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +26,7 @@ def create_app(database_url=None, origin=None):
     application = FastAPI(title="Frank Operations Desk · Sample Demo", lifespan=lifespan, docs_url=None, redoc_url=None)
     application.state.engine = engine
     application.state.settings = settings
+    rate_windows = {}
     application.add_middleware(TrustedHostMiddleware, allowed_hosts=[urlparse(settings.origin).hostname])
 
     @application.exception_handler(DomainError)
@@ -33,6 +35,17 @@ def create_app(database_url=None, origin=None):
 
     @application.middleware("http")
     async def guard(request: Request, call_next):
+        if request.url.path.startswith("/api"):
+            instant = monotonic()
+            for key, (started, _) in list(rate_windows.items()):
+                if instant - started >= 60:
+                    del rate_windows[key]
+            key = request.client.host if request.client else "unknown"
+            started, count = rate_windows.get(key, (instant, 0))
+            if count >= settings.requests_per_minute or (key not in rate_windows and len(rate_windows) >= 1024):
+                return JSONResponse({"detail": "Please slow down and try again in one minute."}, status_code=429,
+                                    headers={"Retry-After": "60", "Cache-Control": "no-store"})
+            rate_windows[key] = (started, count + 1)
         if request.method not in {"GET", "HEAD", "OPTIONS"}:
             if request.headers.get("origin") != settings.origin:
                 return JSONResponse({"detail": "This action requires the demo's own origin."}, status_code=403)
@@ -48,6 +61,8 @@ def create_app(database_url=None, origin=None):
         response.headers["Cache-Control"] = "no-store" if request.url.path.startswith("/api") else "no-cache"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "same-origin"
+        if settings.origin.startswith("https://"):
+            response.headers["Strict-Transport-Security"] = "max-age=31536000"
         response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         return response
 
